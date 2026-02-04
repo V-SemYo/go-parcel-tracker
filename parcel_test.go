@@ -30,21 +30,36 @@ func getTestParcel() Parcel {
 
 // TestAddGetDelete проверяет добавление, получение и удаление посылки
 func TestAddGetDelete(t *testing.T) {
-	// prepare
-	db, err := // настройте подключение к БД
+	db, err := sql.Open("sqlite", "tracker.db")
+	require.NoError(t, err, "faild connect to DB")
+	defer db.Close()
+
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
 
 	// add
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
+	id, err := store.Add(parcel)
+	require.NoError(t, err)
+	require.NotZero(t, id, "must return not zero ID")
+	parcel.Number = id
 
 	// get
 	// получите только что добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
+	storedParcel, err := store.Get(id)
+	require.NoError(t, err)
+	require.Equal(t, parcel, storedParcel, "parcels must match")
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
 	// проверьте, что посылку больше нельзя получить из БД
+	err = store.Delete(id)
+	require.NoError(t, err)
+
+	_, err = store.Get(id)
+	require.Error(t, err, "must return error after delete")
+	require.ErrorIs(t, err, sql.ErrNoRows, "must return 'no rows' error")
 }
 
 // TestSetAddress проверяет обновление адреса
