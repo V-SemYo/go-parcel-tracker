@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type ParcelStore struct {
@@ -83,7 +84,20 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 func (s ParcelStore) SetAddress(number int, address string) error {
 	// реализуйте обновление адреса в таблице parcel
 	// менять адрес можно только если значение статуса registered
-
+	parcel, err := s.Get(number)
+	if err != nil {
+		return err
+	}
+	if parcel.Status != ParcelStatusRegistered {
+		return fmt.Errorf("can't change address because parcel status: %s", parcel.Status)
+	}
+	_, err = s.db.Exec("UPDATE parcel SET address = ? WHERE number = ?",
+		address,
+		number,
+	)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
