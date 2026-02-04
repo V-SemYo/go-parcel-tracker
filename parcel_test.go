@@ -70,6 +70,7 @@ func TestSetAddress(t *testing.T) {
 
 	store := NewParcelStore(db)
 	parcel := getTestParcel()
+
 	// add
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 	id, err := store.Add(parcel)
@@ -82,6 +83,7 @@ func TestSetAddress(t *testing.T) {
 	newAddress := "new test address"
 	err = store.SetAddress(id, newAddress)
 	require.NoError(t, err, "must update address for registered parcel")
+
 	// check
 	// получите добавленную посылку и убедитесь, что адрес обновился
 	updatedParcel, err := store.Get(id)
@@ -89,22 +91,36 @@ func TestSetAddress(t *testing.T) {
 	require.Equal(t, newAddress, updatedParcel.Address, "address must be updated")
 }
 
-/*// TestSetStatus проверяет обновление статуса
+// TestSetStatus проверяет обновление статуса
 func TestSetStatus(t *testing.T) {
-	// prepare
-	db, err := // настройте подключение к БД
+	db, err := sql.Open("sqlite", "tracker.db") // настройте подключение к БД
+	require.NoError(t, err, "faild connect to DB")
+	defer db.Close()
+
+	store := NewParcelStore(db)
+	parcel := getTestParcel()
 
 	// add
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
+	id, err := store.Add(parcel)
+	require.NoError(t, err)
+	require.NotZero(t, id, "must return not zero ID")
+	parcel.Number = id
 
 	// set status
 	// обновите статус, убедитесь в отсутствии ошибки
+	newStatus := ParcelStatusDelivered
+	err = store.SetStatus(id, newStatus)
+	require.NoError(t, err, "must update status")
 
 	// check
 	// получите добавленную посылку и убедитесь, что статус обновился
+	updatedParcel, err := store.Get(id)
+	require.NoError(t, err)
+	require.Equal(t, newStatus, updatedParcel.Status, "status must be updated")
 }
 
-// TestGetByClient проверяет получение посылок по идентификатору клиента
+/*// TestGetByClient проверяет получение посылок по идентификатору клиента
 func TestGetByClient(t *testing.T) {
 	// prepare
 	db, err := // настройте подключение к БД
