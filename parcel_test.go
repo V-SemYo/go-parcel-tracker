@@ -109,7 +109,7 @@ func TestSetStatus(t *testing.T) {
 
 	// set status
 	// обновите статус, убедитесь в отсутствии ошибки
-	newStatus := ParcelStatusDelivered
+	newStatus := ParcelStatusSent
 	err = store.SetStatus(id, newStatus)
 	require.NoError(t, err, "must update status")
 
@@ -120,11 +120,13 @@ func TestSetStatus(t *testing.T) {
 	require.Equal(t, newStatus, updatedParcel.Status, "status must be updated")
 }
 
-/*// TestGetByClient проверяет получение посылок по идентификатору клиента
+// TestGetByClient проверяет получение посылок по идентификатору клиента
 func TestGetByClient(t *testing.T) {
-	// prepare
-	db, err := // настройте подключение к БД
+	db, err := sql.Open("sqlite", "tracker.db")
+	require.NoError(t, err, "faild connect to DB")
+	defer db.Close()
 
+	store := NewParcelStore(db)
 	parcels := []Parcel{
 		getTestParcel(),
 		getTestParcel(),
@@ -140,7 +142,9 @@ func TestGetByClient(t *testing.T) {
 
 	// add
 	for i := 0; i < len(parcels); i++ {
-		id, err := // добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
+		id, err := store.Add(parcels[i]) // добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
+		require.NoError(t, err)
+		require.NotZero(t, id, "should return non-zero ID")
 
 		// обновляем идентификатор добавленной у посылки
 		parcels[i].Number = id
@@ -150,15 +154,18 @@ func TestGetByClient(t *testing.T) {
 	}
 
 	// get by client
-	storedParcels, err := // получите список посылок по идентификатору клиента, сохранённого в переменной client
+	storedParcels, err := store.GetByClient(client) // получите список посылок по идентификатору клиента, сохранённого в переменной client
 	// убедитесь в отсутствии ошибки
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
-
+	require.NoError(t, err)
+	require.Equal(t, len(parcels), len(storedParcels), "number of parcels must match")
 	// check
 	for _, parcel := range storedParcels {
 		// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
+		expectedParcel, exists := parcelMap[parcel.Number]
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
+		require.True(t, exists, "parcel must be in parcelMap")
+		require.Equal(t, expectedParcel, parcel, "parcel fields must match")
 	}
 }
-*/
