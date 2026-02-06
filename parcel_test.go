@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,7 +42,7 @@ func TestAddGetDelete(t *testing.T) {
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 	id, err := store.Add(parcel)
 	require.NoError(t, err)
-	require.NotZero(t, id, "must return not zero ID")
+	assert.NotZero(t, id, "must return not zero ID")
 	parcel.Number = id
 
 	// get
@@ -49,7 +50,7 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 	storedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, parcel, storedParcel, "parcels must match")
+	assert.Equal(t, parcel, storedParcel, "parcels must match")
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
@@ -75,7 +76,7 @@ func TestSetAddress(t *testing.T) {
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 	id, err := store.Add(parcel)
 	require.NoError(t, err)
-	require.NotZero(t, id, "must return not zero ID")
+	assert.NotZero(t, id, "must return not zero ID")
 	parcel.Number = id
 
 	// set address
@@ -88,7 +89,7 @@ func TestSetAddress(t *testing.T) {
 	// получите добавленную посылку и убедитесь, что адрес обновился
 	updatedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, newAddress, updatedParcel.Address, "address must be updated")
+	assert.Equal(t, newAddress, updatedParcel.Address, "address must be updated")
 }
 
 // TestSetStatus проверяет обновление статуса
@@ -104,7 +105,7 @@ func TestSetStatus(t *testing.T) {
 	// добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 	id, err := store.Add(parcel)
 	require.NoError(t, err)
-	require.NotZero(t, id, "must return not zero ID")
+	assert.NotZero(t, id, "must return not zero ID")
 	parcel.Number = id
 
 	// set status
@@ -117,7 +118,7 @@ func TestSetStatus(t *testing.T) {
 	// получите добавленную посылку и убедитесь, что статус обновился
 	updatedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, newStatus, updatedParcel.Status, "status must be updated")
+	assert.Equal(t, newStatus, updatedParcel.Status, "status must be updated")
 }
 
 // TestGetByClient проверяет получение посылок по идентификатору клиента
@@ -144,7 +145,7 @@ func TestGetByClient(t *testing.T) {
 	for i := 0; i < len(parcels); i++ {
 		id, err := store.Add(parcels[i]) // добавьте новую посылку в БД, убедитесь в отсутствии ошибки и наличии идентификатора
 		require.NoError(t, err)
-		require.NotZero(t, id, "should return non-zero ID")
+		assert.NotZero(t, id, "should return non-zero ID")
 
 		// обновляем идентификатор добавленной у посылки
 		parcels[i].Number = id
@@ -158,14 +159,14 @@ func TestGetByClient(t *testing.T) {
 	// убедитесь в отсутствии ошибки
 	// убедитесь, что количество полученных посылок совпадает с количеством добавленных
 	require.NoError(t, err)
-	require.Equal(t, len(parcels), len(storedParcels), "number of parcels must match")
+	assert.Len(t, storedParcels, len(parcels), "number of parcels must match")
 	// check
 	for _, parcel := range storedParcels {
 		// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
 		expectedParcel, exists := parcelMap[parcel.Number]
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
-		require.True(t, exists, "parcel must be in parcelMap")
-		require.Equal(t, expectedParcel, parcel, "parcel fields must match")
+		assert.True(t, exists, "parcel must be in parcelMap")
+		assert.Equal(t, expectedParcel, parcel, "parcel fields must match")
 	}
 }
